@@ -148,8 +148,10 @@ HtmlWebpackInlineSVGPlugin.prototype.getAssetsToInline = function (matchingNodes
     return Promise.all(_.map(matchingNodes, node => {
         let sourcePath = _.find(node.attrs, { name: 'src' }).value;
 
+        let getEncodingFromSourcePath = s => !!(/\.png$/.test(s)) ? null : 'utf8';
+
         return new Promise((resolve, reject) => {
-            fs.readFile(path.resolve(sourcePath), 'utf8', (err, data) => {
+            fs.readFile(path.resolve(sourcePath), getEncodingFromSourcePath(sourcePath), (err, data) => {
                 if (err) {
                     return reject(err);
                 }
