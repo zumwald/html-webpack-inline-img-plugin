@@ -18,6 +18,9 @@ rm(OUTPUT_DIR, (err) => {
 
 describe('HtmlWebpackInlineSVGPlugin', function () {
 
+    let $;
+    let data;
+
     beforeEach(function (done) {
 
         webpack({
@@ -39,130 +42,80 @@ describe('HtmlWebpackInlineSVGPlugin', function () {
 
             expect(err).toBeFalsy()
 
-            done()
+            let htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
+            
+            fs.readFile(htmlFile, 'utf8', function (er, d) {
+    
+                expect(er).toBeFalsy()
+    
+                $ = cheerio.load(d)
+                
+                data = d
+    
+                done()
+    
+            })
 
         })
 
     })
 
-    it('should not inline imgs without inline attribute', function (done) {
+    afterEach(function () {
+        $ = undefined;
+        data = undefined;
+    })
 
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data)
+    it('should not inline imgs without inline attribute', function () {
 
             expect($('img.leave-me').length).toBe(1)
 
-            done()
-
-        })
-
     })
 
-    it('should inline imgs with inline attribute', function (done) {
-
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data)
+    it('should inline imgs with inline attribute', function () {
 
             expect($('svg#inline-me').length).toBe(1)
 
-            done()
-
-        })
-
     })
 
-    it('should inline deep imgs with inline attribute', function (done) {
-        
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data)
+    it('should inline deep imgs with inline attribute', function () {
 
             expect($('svg#deep-inline-me').length).toBe(1)
 
-            done()
-
-        })
-
     })
 
-    it('should remove img tags with inline attribute', function (done) {
-
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data)
+    it('should remove img tags with inline attribute', function () {
 
             expect($('#replace-me').length).toBe(0)
 
-            done()
+    })
 
-        })
+    it('should not base64 inline images that are not png', function () {
+
+        let obj = $('#not-a-png-or-svg');
+        expect(obj.length).toBe(1)
+        
+        expect(obj[0].attribs.src).toBe('some/image.jpg')
 
     })
 
-    it('should ignore images that are not svg', function (done) {
+    it('should ignore inline images that are not png or svg', function () {
 
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data)
-
-            expect($('#not-an-svg').length).toBe(1)
-
-            done()
-
-        })
+            expect($('#a-jpg').length).toBe(0)
 
     })
 
-    it('do not html decode content', function (done) {
+    it('do not html decode content', function () {
 
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
-
-            var $ = cheerio.load(data, {
+            $ = cheerio.load(data, {
                 decodeEntities: false,
             })
 
             expect($('#do-not-decode').html())
                 .toBe('<?= $foo->bar; ?>')
 
-            done()
-
-        })
-
     })
 
-    it('do not touch broken tags', function (done) {
-
-        var htmlFile = path.resolve(OUTPUT_DIR, 'index.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
-
-            expect(er).toBeFalsy()
+    it('do not touch broken tags', function () {
 
             var re1 = /should output broken tags<\/p>/gi;
 
@@ -174,21 +127,17 @@ describe('HtmlWebpackInlineSVGPlugin', function () {
             expect(data.match(re2))
                 .not.toBe(null)
 
-            done()
-
-        })
-
     })
 
     it('allow partials to have broken tags', function (done) {
 
-        var htmlFile = path.resolve(OUTPUT_DIR, 'partial.html')
-
-        fs.readFile(htmlFile, 'utf8', function (er, data) {
+        let htmlFile = path.resolve(OUTPUT_DIR, 'partial.html')
+        
+        fs.readFile(htmlFile, 'utf8', function (er, d) {
 
             expect(er).toBeFalsy()
 
-            const dataSquashed = data.replace(/\s/g,'')
+            const dataSquashed = d.replace(/\s/g,'')
 
             expect(dataSquashed.startsWith('<\/p><\/div>'))
                 .toBe(true)

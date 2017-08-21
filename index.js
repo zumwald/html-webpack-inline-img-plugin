@@ -38,16 +38,16 @@ HtmlWebpackInlineSVGPlugin.prototype.apply = function (compiler) {
             userConfig.plugins = _.map(configObj, (value, key) => ({ [key]: value }));
 
             this.parseHtml(htmlPluginData.html)
-                .then(documentFragment => this.getTagsToReplace(documentFragment, {
-                    img: {
-                        inline: true,
+                .then(documentFragment => this.getTagsToReplace(documentFragment, [
+                    {
+                        tag: 'img',
                         src: /\.svg$/
                     },
-                    img: {
-                        inline: true,
+                    {
+                        tag: 'img',
                         src: /\.png$/
                     }
-                }))
+                ]))
                 .then(matchingNodes => this.getAssetsToInline(matchingNodes)
                     .then(assets => this.decorateAssetsWithCoordinates(assets, matchingNodes))
                 )
@@ -85,19 +85,19 @@ HtmlWebpackInlineSVGPlugin.prototype.parseHtml = function (htmlString) {
  * iterate over a DocumentFragment and return only
  * the nodes which match the supplied descriptor
  * @param {AST.Default.Document} document
- * @param {object} descriptor
+ * @param {Array<object>} descriptors
  * @returns {Promise<Array<AST.Default.Element>>}
  */
-HtmlWebpackInlineSVGPlugin.prototype.getTagsToReplace = function (document, descriptor) {
+HtmlWebpackInlineSVGPlugin.prototype.getTagsToReplace = function (document, descriptors) {
     /** the syntax for the descriptor is:
-     *  {
-     *    <tag>: {
-     *        <attribute>: <value boolean|RegExp>
+     *  [
+     *    {
+     *      tag: <tag>,
+     *      src: <RegExp>
      *    }
-     *  }
+     *  ]
      */
 
-    const desiredTags = _.uniq(_.keys(descriptor));
     let result = [];
 
     let inspectChildrenForMatches = documentNode => {
@@ -105,23 +105,18 @@ HtmlWebpackInlineSVGPlugin.prototype.getTagsToReplace = function (document, desc
             _.forEach(documentNode.childNodes, node => {
                 // for each child node, check if it matches our predicate and
                 // add it to result if it does
-                if (_.includes(desiredTags, node.nodeName)) {
-                    let filter = descriptor[node.nodeName];
-                    if (_.isObjectLike(filter) && _.every(filter, (predicate, predicateKey) => {
-                        return _.some(node.attrs, attr => {
-                            if (_.isRegExp(predicate)) {
-                                return attr.name === predicateKey && predicate.test(attr.value);
-                            } else if (_.isBoolean(predicate)) {
-                                return attr.name === predicateKey;
-                            } else {
-                                return false;
-                            }
-                        })
-                    })) {
-                        // we found a node whose attributes match one of our predicates!
-                        result.push(node);
+                _.forEach(descriptors, d => {
+                    if (d.tag === node.nodeName) {
+                        if (_.every([
+                            attrs => _.some(attrs, a => a.name === 'inline'),
+                            attrs => _.some(attrs, a => a.name === 'src' && d.src.test(a.value))
+                        ], validator => validator(node.attrs))) {
+                            // we found a node whose attributes match one of our predicates!
+                            result.push(node);
+                            return false; // bail out of forEach loop
+                        }
                     }
-                }
+                })
 
                 // recurse over any of the child's own children
                 if (node.childNodes && node.childNodes.length) {
@@ -174,7 +169,8 @@ HtmlWebpackInlineSVGPlugin.prototype.getAssetsToInline = function (matchingNodes
                     });
                 } else if (_.endsWith(sourcePath, '.png')) {
                     let srcContent = `data:image/png;base64,${new Buffer(data).toString('base64')}`;
-                    let content = `<img src="${srcContent}" ${node.attrs.map(a => `${a.key}="${a.value}"`).join(' ')} >`;
+                    let content = `<img ${node.attrs.filter(a => a.name !== 'src' && a.name !== 'inline')
+                        .map(a => `${a.name}="${a.value}"`).join(' ')} src="${srcContent}" >`;
 
                     return resolve({
                         key: sourcePath,
