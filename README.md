@@ -1,10 +1,8 @@
-Inline SVG extension for the HTML Webpack Plugin
+Inline img extension for the HTML Webpack Plugin
 ========================================
-[![npm version](https://badge.fury.io/js/html-webpack-inline-svg-plugin.svg)](https://badge.fury.io/js/html-webpack-inline-svg-plugin) [![Build status](https://travis-ci.org/theGC/html-webpack-inline-svg-plugin.svg)](https://travis-ci.org/theGC/html-webpack-inline-svg-plugin)
+Forked and extended from [Guy Campbell](https://github.com/thegc)'s work on [html-webpack-inline-svg-plugin](https://github.com/theGC/html-webpack-inline-svg-plugin).
 
-Allows you to inline SVGs that are parsed by [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
-
-Now you can easily add inline SVGs to your output html. Combined with techniques such as: [Icon System with SVG Sprites](https://css-tricks.com/svg-sprites-use-better-icon-fonts/) you have a simple way of ensuring your svg referenced icons are always visible.
+Allows you to inline SVGs or PNGs that are parsed by [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin).
 
 The plugin relies on [svgo](https://github.com/svg/svgo) to optimise SVGs. You can configure it's settings, check below for more details.
 
@@ -12,12 +10,12 @@ Installation
 ------------
 Install the plugin with npm:
 ```shell
-$ npm install --save-dev html-webpack-inline-svg-plugin
+$ npm install --save-dev @zumwald/html-webpack-inline-img-plugin
 ```
 
 **or** [yarn](https://yarnpkg.com/):
 ```shell
-$ yarn add html-webpack-inline-svg-plugin --dev
+$ yarn add @zumwald/html-webpack-inline-img-plugin --dev
 ```
 
 Usage
@@ -25,7 +23,7 @@ Usage
 Require the plugin in your webpack config:
 
 ```javascript
-const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
+const HtmlWebpackInlineImgPlugin = require('@zumwald/html-webpack-inline-img-plugin');
 ```
 
 Add the plugin to your webpack config as follows:
@@ -33,27 +31,27 @@ Add the plugin to your webpack config as follows:
 ```javascript
 plugins: [
     new HtmlWebpackPlugin(),
-    new HtmlWebpackInlineSVGPlugin()
+    new HtmlWebpackInlineImgPlugin()
 ]
 ```
 
-Add `img` tags with `inline` attribute and `.svg` file as src to your template/s that the html-webpack-plugin is processing (the default is `index.html`).
+Add `img` tags with `inline` attribute and `.svg` or `.png` file as src to your template/s that the html-webpack-plugin is processing (the default is `index.html`).
 
 ```html
 <!-- Works: below img tag will be removed and replaced by the content of the svg in its src -->
 <img inline src="static/icons.svg">
 
+<!-- Also works: below img tag src field will be replaced with base64 encoded string-->
+<img inline src="static/image.png">
+
 <!-- Ignored: this img will not be touched as it has no inline attribute -->
 <img src="static/foo.svg">
-
-<!-- Broken: this plugin will ignore this src as it is not an svg -->
-<img inline src="static/i-will-be-ignored.png">
 ```
 
 Getting to your SVGs
 -----------
 
-References to your `*.svg` files within the `img` tags src should be relative to your project root, this is usually the directory your `package.json` file sits in:
+References to your `*.svg` or `*.png` files within the `img` tags src should be relative to your project root, this is usually the directory your `package.json` file sits in:
 
 ```
 my-project

@@ -1,7 +1,7 @@
 {
-    "name": "html-webpack-inline-svg-plugin",
-    "version": "0.1.1",
-    "description": "Embed svg inline when using the html webpack plugin",
+    "name": "@zumwald/html-webpack-inline-img-plugin",
+    "version": "0.2.0-beta",
+    "description": "Embed img tags inline when using the html webpack plugin, adapted from html-webpack-inline-svg-plugin",
     "main": "index.js",
     "files": [
         "index.js",
@@ -14,21 +14,17 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/thegc/html-webpack-inline-svg-plugin.git"
+        "url": "https://github.com/zumwald/html-webpack-inline-img-plugin.git"
     },
     "keywords": [
         "webpack",
         "plugin",
         "html-webpack-plugin",
         "inline",
-        "svg"
+        "img"
     ],
-    "author": "Guy Campbell (https://github.com/thegc)",
+    "author": "Dan Zumwalt (https://github.com/zumwald)",
     "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/thegc/html-webpack-inline-svg-plugin/issues"
-    },
-    "homepage": "https://github.com/thegc/html-webpack-inline-svg-plugin",
     "devDependencies": {
         "html-webpack-plugin": "^2.28.0",
         "jasmine": "^2.4.1",

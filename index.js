@@ -42,6 +42,10 @@ HtmlWebpackInlineSVGPlugin.prototype.apply = function (compiler) {
                     img: {
                         inline: true,
                         src: /\.svg$/
+                    },
+                    img: {
+                        inline: true,
+                        src: /\.png$/
                     }
                 }))
                 .then(matchingNodes => this.getAssetsToInline(matchingNodes)
@@ -154,19 +158,29 @@ HtmlWebpackInlineSVGPlugin.prototype.getAssetsToInline = function (matchingNodes
                 if (err) {
                     return reject(err);
                 }
+
+                if (_.endsWith(sourcePath, '.svg')) {
+                    const svgo = new SVGO(userConfig);
     
-                const svgo = new SVGO(userConfig);
+                    svgo.optimize(data, result => {
+                        if (result.error) {
+                            return reject(result.error);
+                        }
     
-                svgo.optimize(data, result => {
-                    if (result.error) {
-                        return reject(result.error);
-                    }
-    
+                        return resolve({
+                            key: sourcePath,
+                            value: result.data
+                        });
+                    });
+                } else if (_.endsWith(sourcePath, '.png')) {
+                    let srcContent = `data:image/png;base64,${new Buffer(data).toString('base64')}`;
+                    let content = `<img src="${srcContent}" ${node.attrs.map(a => `${a.key}="${a.value}"`).join(' ')} >`;
+
                     return resolve({
                         key: sourcePath,
-                        value: result.data
+                        value: content
                     });
-                });
+                }
             });
         });
     }));
