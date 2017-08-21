@@ -1,5 +1,5 @@
 {
-    "name": "html-webpack-inline-svg-plugin",
+    "name": "@zumwald/html-webpack-inline-svg-plugin",
     "version": "0.1.1",
     "description": "Embed svg inline when using the html webpack plugin",
     "main": "index.js",
@@ -24,6 +24,9 @@
         "svg"
     ],
     "author": "Guy Campbell (https://github.com/thegc)",
+    "contributors": [
+        "Dan Zumwalt (https://github.com/zumwald)"
+    ],
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/thegc/html-webpack-inline-svg-plugin/issues"
