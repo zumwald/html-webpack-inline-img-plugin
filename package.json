@@ -1,6 +1,6 @@
 {
   "name": "@zumwald/html-webpack-inline-img-plugin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Embed img tags inline when using the html webpack plugin, adapted from html-webpack-inline-svg-plugin",
   "main": "index.js",
   "files": [
